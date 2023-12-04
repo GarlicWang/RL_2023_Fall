@@ -61,11 +61,11 @@ class UMazeEnv(MazeEnv):
 
 class MediumMazeEnv(MazeEnv):
     # Agent_centric_res = 32
-    START_POS = np.array([2.8, 0.8])
+    START_POS = np.array([4, 1])
     # task 1: 
-    TARGET_POS = np.array([1.2, 1])
+    TARGET_POS = np.array([6, 5])
     # task 2:
-    # TARGET_POS = np.array([4. , ])
+    # TARGET_POS = np.array([1. , 6.])
 
 
     def _default_hparams(self):

@@ -14,14 +14,23 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 
 notes = 'non-hierarchical RL experiments in maze env'
 
+wandb = AttrDict(
+    # wandb_project_name='SPiRL_itp_test_0912',
+    # wandb_entity_name='tripled1028',
+    # wandb_group='SPiRL_jump'
+    wandb_project_name = 'SBTMDRL',
+    wandb_entity_name='sbtmdrl',
+)
+
+
 configuration = {
     'seed': 42,
     'agent': MazeSACAgent,
     'environment': ACRandMaze0S40Env,
     'data_dir': '.',
-    'num_epochs': 10,
+    'num_epochs': 50,
     'max_rollout_len': 1000,
-    'n_steps_per_epoch': 1000,
+    'n_steps_per_epoch': 10000,
     'n_warmup_steps': 5e3,
     # 'log_videos': True,
 }
@@ -69,6 +78,7 @@ agent_config = AttrDict(
     clip_q_target=False,
     batch_size=256,
     log_videos=True,
+    log_video_caption=True,
 )
 
 # Dataset - Random data
