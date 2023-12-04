@@ -1,0 +1,9 @@
+numpy
+scipy
+mujoco_py
+gym
+wandb
+matplotlib
+torch==1.13.1
+git+https://github.com/namsan96/torch_truncnorm@main#torch_truncnorm
+
