@@ -45,12 +45,19 @@ class ACRandMaze0S40Env(MazeEnv):
         return super()._default_hparams().overwrite(default_dict)
 
 class UMazeEnv(MazeEnv):
-    # Agent_centric_res = 32
-    START_POS = np.array([5., 2.])
+    # # Agent_centric_res = 32
+    # START_POS = np.array([5., 2.])
+    # # task 1: 
+    # TARGET_POS = np.array([10., 2.])
+    # # task 2:
+    # # TARGET_POS = np.array([4. , ])
+
+    START_POS = np.array([2.8, 0.8])
     # task 1: 
-    TARGET_POS = np.array([10., 2.])
+    TARGET_POS = np.array([1.2, 1])
     # task 2:
     # TARGET_POS = np.array([4. , ])
+
 
 
     def _default_hparams(self):
