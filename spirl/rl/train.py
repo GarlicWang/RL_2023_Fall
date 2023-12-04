@@ -157,16 +157,27 @@ class RLTrainer:
     def val(self):
         """Evaluate agent."""
         val_rollout_storage = RolloutStorage()
+        self.success_rate = 0
         with self.agent.val_mode():
             with torch.no_grad():
                 with timing("Eval rollout time: "):
                     for _ in range(WandBLogger.N_LOGGED_SAMPLES):   # for efficiency instead of self.args.n_val_samples
-                        val_rollout_storage.append(self.sampler.sample_episode(is_train=False, render=True))
+                        val_rollout = self.sampler.sample_episode(is_train=False, render=True)
+                        # val_rollout_storage.append(self.sampler.sample_episode(is_train=False, render=True))
+                        val_rollout_storage.append(val_rollout)
+                        if val_rollout['success'][-1]:
+                                self.success_rate+=1
+                                # success_flag+=1
+                                print("success!!!")
 
         rollout_stats = val_rollout_storage.rollout_stats()
         # ipdb.set_trace()
         if self.is_chef:
             with timing("Eval log time: "):
+                if 'success' in val_rollout:
+                    rollout_stats['success'] = self.success_rate/WandBLogger.N_LOGGED_SAMPLES
+                    self.success_rate = 0
+                
                 self.agent.log_outputs(rollout_stats, val_rollout_storage,
                                        self.logger, log_images=True, step=self.global_step)
             print("Evaluation Avg_Reward: {}".format(rollout_stats.avg_reward))

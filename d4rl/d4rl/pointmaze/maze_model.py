@@ -142,13 +142,13 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         ob = self._get_obs()
         # ipdb.set_trace()
         if self.reward_type == 'sparse':
-            reward = 1.0 if np.linalg.norm(ob[0:2] - self._target) <= 2.0 else 0.0
+            reward = 1.0 if np.linalg.norm(ob[0:2] - self._target) <= 0.2 else 0.0
         elif self.reward_type == 'dense':
             reward = np.exp(-np.linalg.norm(ob[0:2] - self._target))
         else:
             raise ValueError('Unknown reward type %s' % self.reward_type)
         done = False
-        return ob, reward, done, {}
+        return ob, reward, done, {"success": np.linalg.norm(ob[0:2] - self._target) <= 0.2, "distance":ob[0:2] - self._target}
 
     def render(self, mode, *args, **kwargs):
         if self.agent_centric_view:

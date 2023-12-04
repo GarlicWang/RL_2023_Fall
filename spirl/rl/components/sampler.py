@@ -73,6 +73,7 @@ class Sampler:
         """Samples one episode from the environment."""
         self.init(is_train)
         episode, done = [], False
+        success = 0
         with self._env.val_mode() if not is_train else contextlib.suppress():
             with self._agent.val_mode() if not is_train else contextlib.suppress():
                 with self._agent.rollout_mode():
@@ -85,6 +86,9 @@ class Sampler:
                         if render:
                             render_obs = self._env.render()
                         obs, reward, done, info = self._env.step(agent_output.action)
+                        # ipdb.set_trace()
+                        if info["success"] > 0:
+                            success = 1
                         obs = self._postprocess_obs(obs)
                         episode.append(AttrDict(
                             observation=self._obs,
@@ -93,6 +97,7 @@ class Sampler:
                             action=agent_output.action,
                             observation_next=obs,
                             info=obj2np(info),
+                            success=success
                         ))
                         if render:
                             episode[-1].update(AttrDict(image=render_obs))
