@@ -42,7 +42,7 @@ def point_maze(maze_str):
 
     mjcmodel = MJCModel('point_maze')
     mjcmodel.root.compiler(inertiafromgeom="true", angle="radian", coordinate="local")
-    mjcmodel.root.option(timestep="0.01", gravity="0 0 0", iterations="20", integrator="Euler")
+    mjcmodel.root.option(timestep="0.01", gravity="5 0 0", iterations="20", integrator="Euler")
     # mjcmodel.root.option(timestep="0.01", gravity="0 0 0", iteration="20", integrator="Euler")
     default = mjcmodel.root.default()
     default.joint(damping=1, limited='false')
@@ -136,19 +136,20 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
 
     def step(self, action):
         action = np.clip(action, -1.0, 1.0)
+        
         self.clip_velocity()
         self.do_simulation(action, self.frame_skip)
         self.set_marker()
         ob = self._get_obs()
         # ipdb.set_trace()
         if self.reward_type == 'sparse':
-            reward = 1.0 if np.linalg.norm(ob[0:2] - self._target) <= 0.2 else 0.0
+            reward = 1.0 if np.linalg.norm(ob[0:2] - self._target) <= 0.5 else 0.0
         elif self.reward_type == 'dense':
             reward = np.exp(-np.linalg.norm(ob[0:2] - self._target))
         else:
             raise ValueError('Unknown reward type %s' % self.reward_type)
         done = False
-        return ob, reward, done, {"success": np.linalg.norm(ob[0:2] - self._target) <= 0.2, "distance":ob[0:2] - self._target}
+        return ob, reward, done, {"success": np.linalg.norm(ob[0:2] - self._target) <= 0.5, "action":action ,"distance":ob[0:2] - self._target}
 
     def render(self, mode, *args, **kwargs):
         if self.agent_centric_view:
