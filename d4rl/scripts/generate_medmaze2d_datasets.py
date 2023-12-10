@@ -84,6 +84,8 @@ def main():
     parser.add_argument('--min_traj_len', type=int, default=int(5), help='Min number of samples per trajectory')
     parser.add_argument('--env_name', type=str, default='maze2d-medium-v1', help='Maze type')
     parser.add_argument('--num_samples', type=int, default=int(1e6), help='Num samples to collect')
+    parser.add_argument('--num_trajs', type=int, default=int(100), help='Num trajs to collect')
+
     parser.add_argument('--data_dir', type=str, default='.', help='Base directory for dataset')
     parser.add_argument('--batch_idx', type=int, default=int(-1), help='(Optional) Index of generated data batch')
     args = parser.parse_args()
@@ -95,17 +97,23 @@ def main():
     controller = waypoint_controller.WaypointController(maze)
     env = maze_model.MazeEnv(maze)
 
-    s = env.reset()
-    env.set_target()
+    s = env.reset(10)
+    targ_pos = (1,5)
+    env.set_target(targ_pos)
 
     act = env.action_space.sample()
     done = False
 
     data = reset_data()
     ts, cnt = 0, 0
+    print(f"All init pos: {env.empty_and_goal_locations}")
+    num_traj = 0
+    subdir_name = f'init{int(s[0])}{int(s[1])}_targ{int(targ_pos[0])}{int(targ_pos[1])}'
     for _ in range(args.num_samples):
     # for tt in tqdm.tqdm(range(args.num_samples)):
-
+        if ts == 0:
+            # subdir_name = f"init{int(s[0])}{int(s[1])}"
+            print(f"position: {s[0:2]}")
         position = s[0:2]
         velocity = s[2:4]
         act, done = controller.get_action(position, velocity, env._target)
@@ -124,15 +132,17 @@ def main():
 
         ts += 1
         if done:
-            # if len(data['actions']) > args.min_traj_len:
-            save_data(args, data, cnt)
-            cnt += 1
+            if len(data['actions']) > args.min_traj_len:
+                if num_traj > 0:
+                    save_data(args, data, cnt, subdir_name)
+                    cnt += 1
+                num_traj += 1
             # ipdb.set_trace()
             data = reset_data()
             controller = waypoint_controller.WaypointController(maze)
             env = maze_model.MazeEnv(maze)
 
-            s = env.reset()
+            s = env.reset(10)
             # env.set_target()
             
             # env.set_target()
@@ -140,37 +150,39 @@ def main():
             # s = reset_env(env, agent_centric=args.agent_centric)
 
             ts = 0
+            if num_traj > args.num_trajs:
+                break
         else:
             s = ns
 
         if args.render:
             env.render()
 
-    ipdb.set_trace()
-    maze_name = "medMaze"
-    if args.batch_idx >= 0:
-        dir_name = 'maze2d-%s-noisy' % maze_name if args.noisy else 'maze2d-%s-sparse' % maze_name
-        os.makedirs(os.path.join(args.data_dir, dir_name), exist_ok=True)
-        fname = os.path.join(args.data_dir, dir_name, "rollouts_batch_{}.h5".format(args.batch_idx))
-    else:
-        os.makedirs(args.data_dir, exist_ok=True)
-        fname = 'maze2d-%s-noisy.hdf5' % maze_name if args.noisy else 'maze2d-%s-sparse.hdf5' % maze_name
-        fname = os.path.join(args.data_dir, fname)
+    # ipdb.set_trace()
+    # maze_name = "medMaze"
+    # if args.batch_idx >= 0:
+    #     dir_name = 'maze2d-%s-noisy' % maze_name if args.noisy else 'maze2d-%s-sparse' % maze_name
+    #     os.makedirs(os.path.join(args.data_dir, dir_name), exist_ok=True)
+    #     fname = os.path.join(args.data_dir, dir_name, "rollouts_batch_{}.h5".format(args.batch_idx))
+    # else:
+    #     os.makedirs(args.data_dir, exist_ok=True)
+    #     fname = 'maze2d-%s-noisy.hdf5' % maze_name if args.noisy else 'maze2d-%s-sparse.hdf5' % maze_name
+    #     fname = os.path.join(args.data_dir, fname)
 
-    dataset = h5py.File(fname, 'w')
-    npify(data)
-    for k in data:
-        dataset.create_dataset(k, data=data[k], compression='gzip')
+    # dataset = h5py.File(fname, 'w')
+    # npify(data)
+    # for k in data:
+    #     dataset.create_dataset(k, data=data[k], compression='gzip')
 
 
-def save_data(args, data, idx):
+def save_data(args, data, idx, subdir_name):
     # ipdb.set_trace()
     save_video("medMaze_scripts_{}.mp4".format(idx), data['images'])
     dir_name = ''
     if args.batch_idx >= 0:
         dir_name = os.path.join(dir_name, "batch_{}".format(args.batch_idx))
-    os.makedirs(os.path.join(args.data_dir, dir_name), exist_ok=True)
-    file_name = os.path.join(args.data_dir, dir_name, "rollout_{}.h5".format(idx))
+    os.makedirs(os.path.join(args.data_dir, subdir_name, dir_name), exist_ok=True)
+    file_name = os.path.join(args.data_dir, subdir_name, dir_name, "rollout_{}.h5".format(idx))
 
     # save rollout to file
     f = h5py.File(file_name, "w")
