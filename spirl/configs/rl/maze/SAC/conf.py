@@ -26,9 +26,9 @@ configuration = {
     # 'environment': ACRandMaze0S40Env,
     'environment': MediumMazeEnv,
     'data_dir': '.',
-    'num_epochs': 50,
+    'num_epochs': 30,
     'max_rollout_len': 1000,
-    'n_steps_per_epoch': 10000,
+    'n_steps_per_epoch': 1000,
     'n_warmup_steps': 5e3,
     # 'log_videos': True,
 }
