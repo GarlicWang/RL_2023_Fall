@@ -141,7 +141,7 @@ class BasicTrainer:
         print(f"[Test] Avg loss: {loss_avg:.4f}, best loss: {best_loss:.4f}")
 
     def run(self) -> None:
-        for epoch in tqdm(range(self.epoch)):
+        for epoch in range(self.epoch):
             print(f"[Epoch {epoch:04d}/{self.epoch:04d}]")
             self.train()
             self.valid()
@@ -159,13 +159,26 @@ class DomainTranslaterTrainer(BasicTrainer):
         valid_loader: DataLoader,
         test_loader: DataLoader,
         optimizer: optim.Optimizer,
+        epoch: int,
         device: Union[str, torch.device] = torch.device("cuda"),
         enable_wandb: bool = True,
         project: str = "RL_final_mapping",
         name: str = "domain_translation",
         config: object = None,
     ) -> None:
-        super().__init__(model, train_loader, valid_loader, test_loader, optimizer, device, enable_wandb, project, name, config)
+        super().__init__(
+            model,
+            train_loader,
+            valid_loader,
+            test_loader,
+            optimizer,
+            epoch,
+            device,
+            enable_wandb,
+            project,
+            name,
+            config,
+        )
 
     def __loss_fn(self, source: torch.Tensor, gt: torch.Tensor) -> torch.Tensor:
         return F.mse_loss(source, gt)

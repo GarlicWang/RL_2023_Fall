@@ -50,7 +50,7 @@ def main(config: DictConfig) -> None:
 
     model = DomainTranslater(
         input_dim=config.model.input_dim,
-        output_dim=config.model.outpu_dim,
+        output_dim=config.model.output_dim,
         latent_dim=config.model.latent_dim,
     )
 
@@ -62,6 +62,7 @@ def main(config: DictConfig) -> None:
         valid_loader=valid_loader,
         test_loader=test_loader,
         optimizer=optimizer,
+        epoch=config.train.epoch,
         device=device,
         enable_wandb=config.enable_wandb,
         project=config.project,

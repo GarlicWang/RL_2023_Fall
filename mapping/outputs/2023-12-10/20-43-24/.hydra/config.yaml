@@ -1,0 +1,22 @@
+project: RL_final_mapping
+name: pseudo_basic
+seed: 0
+data:
+  mean_1: 0.0
+  std_1: 1.0
+  dim_1: 1024
+  mean_2: 1.0
+  std_2: 2.0
+  dim_2: 1024
+  n_train_data: 10000
+  n_valid_data: 2000
+  n_test_data: 1000
+  batch_size: 32
+train:
+  lr: 0.0001
+  weight_decay: 5.0e-05
+model:
+  input_dim: 1024
+  output_dim: 1024
+  latent_dim: 256
+enable_wandb: true
