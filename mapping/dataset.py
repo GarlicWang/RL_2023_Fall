@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from torch.utils.data import Dataset
 from typing import *
 
@@ -39,8 +40,8 @@ class PseudoDataset(Dataset):
                 mean_1 -= multiplier
                 mean_2 += multiplier
 
-                std_1 = std_1 + (1 if multiplier % 2 == 0 else -1) * multiplier / 10
-                std_2 = std_2 + (1 if multiplier % 2 == 0 else -1) * multiplier / 10
+                std_1 += np.abs(np.random.normal(0, 1))
+                std_2 += np.abs(np.random.normal(0, 1))
 
                 self.data_dom_1[start:end] = torch.normal(mean=mean_1, std=std_1, size=(size, dim_1))
                 self.data_dom_2[start:end] = torch.normal(mean=mean_2, std=std_2, size=(size, dim_2))
