@@ -13,7 +13,7 @@ def set_seed(seed: int) -> None:
     torch.manual_seed(seed=seed)
 
 
-@hydra.main(version_base=None, config_path="config", config_name="pseudo_basic")
+@hydra.main(config_path="config", config_name="pseudo_basic")
 def main(config: DictConfig) -> None:
     print("Configuration")
     print("=" * 20)
