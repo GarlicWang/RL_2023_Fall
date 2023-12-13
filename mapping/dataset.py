@@ -7,8 +7,8 @@ class PseudoDataset(Dataset):
     def __init__(
         self,
         n_data: int = 10000,
-        domain_1: Tuple[float, float, int] = (0.0, 1.0, 1024),
-        domain_2: Tuple[float, float, int] = (1.0, 2.0, 1024),
+        domain_1: Tuple[float, float, int] = (-10.0, 1.0, 1024),
+        domain_2: Tuple[float, float, int] = (10.0, 2.0, 1024),
         num_cluster: int = 10,
         use_cluster: bool = True,
     ) -> None:
@@ -36,11 +36,11 @@ class PseudoDataset(Dataset):
                 mean_1, std_1, dim_1 = domain_1
                 mean_2, std_2, dim_2 = domain_2
 
-                mean_1 += multiplier * 0.5
-                mean_2 += multiplier * 0.5
+                mean_1 -= multiplier
+                mean_2 += multiplier
 
-                std_1 += multiplier * 0.1
-                std_2 += multiplier * 0.1
+                std_1 = std_1 + (1 if multiplier % 2 == 0 else -1) * multiplier / 10
+                std_2 = std_2 + (1 if multiplier % 2 == 0 else -1) * multiplier / 10
 
                 self.data_dom_1[start:end] = torch.normal(mean=mean_1, std=std_1, size=(size, dim_1))
                 self.data_dom_2[start:end] = torch.normal(mean=mean_2, std=std_2, size=(size, dim_2))
