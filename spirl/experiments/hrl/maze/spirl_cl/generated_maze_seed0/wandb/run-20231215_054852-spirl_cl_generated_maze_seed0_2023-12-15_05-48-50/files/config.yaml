@@ -1,0 +1,265 @@
+wandb_version: 1
+
+exp_dir:
+  desc: null
+  value: ./experiments
+conf_path:
+  desc: null
+  value: spirl/configs/hrl/maze/spirl_cl/conf.py
+general_seed:
+  desc: null
+  value: 42
+general_data_dir:
+  desc: null
+  value: .
+general_num_epochs:
+  desc: null
+  value: 100
+general_max_rollout_len:
+  desc: null
+  value: 2000
+general_n_steps_per_epoch:
+  desc: null
+  value: 100000.0
+general_n_warmup_steps:
+  desc: null
+  value: 5000.0
+agent_hl_agent_params_batch_size:
+  desc: null
+  value: 256
+agent_hl_agent_params_replay_params_capacity:
+  desc: null
+  value: 100000.0
+agent_hl_agent_params_replay_params_dump_replay:
+  desc: null
+  value: false
+agent_hl_agent_params_clip_q_target:
+  desc: null
+  value: false
+agent_hl_agent_params_policy_params_action_dim:
+  desc: null
+  value: 10
+agent_hl_agent_params_policy_params_input_dim:
+  desc: null
+  value: 4
+agent_hl_agent_params_policy_params_max_action_range:
+  desc: null
+  value: 2.0
+agent_hl_agent_params_policy_params_prior_model_params_state_dim:
+  desc: null
+  value: 4
+agent_hl_agent_params_policy_params_prior_model_params_action_dim:
+  desc: null
+  value: 2
+agent_hl_agent_params_policy_params_prior_model_params_n_rollout_steps:
+  desc: null
+  value: 10
+agent_hl_agent_params_policy_params_prior_model_params_kl_div_weight:
+  desc: null
+  value: 0.01
+agent_hl_agent_params_policy_params_prior_model_params_prior_input_res:
+  desc: null
+  value: 32
+agent_hl_agent_params_policy_params_prior_model_params_n_input_frames:
+  desc: null
+  value: 2
+agent_hl_agent_params_policy_params_prior_model_params_cond_decode:
+  desc: null
+  value: true
+agent_hl_agent_params_policy_params_prior_model_checkpoint:
+  desc: null
+  value: ./experiments/skill_prior_learning/maze/hierarchical_cl
+agent_hl_agent_params_critic_params_action_dim:
+  desc: null
+  value: 10
+agent_hl_agent_params_critic_params_input_dim:
+  desc: null
+  value: 4
+agent_hl_agent_params_critic_params_output_dim:
+  desc: null
+  value: 1
+agent_hl_agent_params_critic_params_n_layers:
+  desc: null
+  value: 2
+agent_hl_agent_params_critic_params_nz_mid:
+  desc: null
+  value: 256
+agent_hl_agent_params_critic_params_action_input:
+  desc: null
+  value: true
+agent_hl_agent_params_critic_params_unused_obs_size:
+  desc: null
+  value: 6144
+agent_hl_agent_params_td_schedule_params_p:
+  desc: null
+  value: 1.0
+agent_ll_agent_params_batch_size:
+  desc: null
+  value: 256
+agent_ll_agent_params_replay_params_capacity:
+  desc: null
+  value: 100000.0
+agent_ll_agent_params_replay_params_dump_replay:
+  desc: null
+  value: false
+agent_ll_agent_params_clip_q_target:
+  desc: null
+  value: false
+agent_ll_agent_params_policy_params_policy_model_params_state_dim:
+  desc: null
+  value: 4
+agent_ll_agent_params_policy_params_policy_model_params_action_dim:
+  desc: null
+  value: 2
+agent_ll_agent_params_policy_params_policy_model_params_n_rollout_steps:
+  desc: null
+  value: 10
+agent_ll_agent_params_policy_params_policy_model_params_kl_div_weight:
+  desc: null
+  value: 0.01
+agent_ll_agent_params_policy_params_policy_model_params_prior_input_res:
+  desc: null
+  value: 32
+agent_ll_agent_params_policy_params_policy_model_params_n_input_frames:
+  desc: null
+  value: 2
+agent_ll_agent_params_policy_params_policy_model_params_cond_decode:
+  desc: null
+  value: true
+agent_ll_agent_params_policy_params_policy_model_checkpoint:
+  desc: null
+  value: ./experiments/skill_prior_learning/maze/hierarchical_cl
+agent_ll_agent_params_policy_params_initial_log_sigma:
+  desc: null
+  value: -50.0
+agent_ll_agent_params_policy_params_state_dim:
+  desc: null
+  value: 4
+agent_ll_agent_params_policy_params_action_dim:
+  desc: null
+  value: 2
+agent_ll_agent_params_policy_params_n_rollout_steps:
+  desc: null
+  value: 10
+agent_ll_agent_params_policy_params_kl_div_weight:
+  desc: null
+  value: 0.01
+agent_ll_agent_params_policy_params_prior_input_res:
+  desc: null
+  value: 32
+agent_ll_agent_params_policy_params_n_input_frames:
+  desc: null
+  value: 2
+agent_ll_agent_params_policy_params_cond_decode:
+  desc: null
+  value: true
+agent_ll_agent_params_critic_params_action_dim:
+  desc: null
+  value: 2
+agent_ll_agent_params_critic_params_input_dim:
+  desc: null
+  value: 4
+agent_ll_agent_params_critic_params_output_dim:
+  desc: null
+  value: 1
+agent_ll_agent_params_critic_params_action_input:
+  desc: null
+  value: true
+agent_ll_agent_params_critic_params_unused_obs_size:
+  desc: null
+  value: 10
+agent_hl_interval:
+  desc: null
+  value: 10
+agent_log_videos:
+  desc: null
+  value: false
+agent_update_hl:
+  desc: null
+  value: true
+agent_update_ll:
+  desc: null
+  value: false
+agent_device:
+  desc: null
+  value: cuda
+data_dataset_spec_n_actions:
+  desc: null
+  value: 2
+data_dataset_spec_state_dim:
+  desc: null
+  value: 4
+data_dataset_spec_split_train:
+  desc: null
+  value: 0.9
+data_dataset_spec_split_val:
+  desc: null
+  value: 0.1
+data_dataset_spec_split_test:
+  desc: null
+  value: 0.0
+data_dataset_spec_res:
+  desc: null
+  value: 32
+data_dataset_spec_crop_rand_subseq:
+  desc: null
+  value: true
+data_dataset_spec_max_seq_len:
+  desc: null
+  value: 300
+env_reward_norm:
+  desc: null
+  value: 1.0
+env_screen_height:
+  desc: null
+  value: 32
+env_screen_width:
+  desc: null
+  value: 32
+env_device:
+  desc: null
+  value: cuda
+sampler_n_frames:
+  desc: null
+  value: 2
+ckpt_path:
+  desc: null
+  value: null
+notes:
+  desc: null
+  value: hierarchical RL on the maze env
+mpi_rank:
+  desc: null
+  value: 0
+mpi_is_chef:
+  desc: null
+  value: true
+mpi_num_workers:
+  desc: null
+  value: 1
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.18
+    cli_version: 0.16.0
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1702648132.089392
+    t:
+      1:
+      - 1
+      - 41
+      - 55
+      2:
+      - 1
+      - 41
+      - 55
+      3:
+      - 16
+      - 23
+      4: 3.8.18
+      5: 0.16.0
+      8:
+      - 5
+      13: linux-x86_64

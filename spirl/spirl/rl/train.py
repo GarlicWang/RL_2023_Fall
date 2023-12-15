@@ -15,9 +15,10 @@ from spirl.rl.utils.rollout_utils import RolloutSaver
 from spirl.rl.components.sampler import Sampler
 from spirl.rl.components.replay_buffer import RolloutStorage
 
-WANDB_PROJECT_NAME = 'your_project_name'
-WANDB_ENTITY_NAME = 'your_entity_name'
-
+WANDB_PROJECT_NAME = 'spirl'
+WANDB_ENTITY_NAME = 'shane-wang0817'
+assert WANDB_PROJECT_NAME != None, "need wandb project name"
+assert WANDB_ENTITY_NAME != None, "need wandb entity name"
 
 class RLTrainer:
     """Sets up RL training loop, instantiates all components, runs training."""
@@ -262,8 +263,7 @@ class RLTrainer:
             # setup logger
             logger = None
             if self.args.mode == 'train':
-                exp_name = f"{os.path.basename(self.args.path)}_{self.args.prefix}" if self.args.prefix \
-                    else os.path.basename(self.args.path)
+                exp_name = f"{os.path.basename(self.args.path)}_{self.args.prefix}{datetime_str()}" if self.args.prefix else os.path.basename(self.args.path)
                 if self._hp.logging_target == 'wandb':
                     logger = WandBLogger(exp_name, WANDB_PROJECT_NAME, entity=WANDB_ENTITY_NAME,
                                          path=self._hp.exp_path, conf=conf)
