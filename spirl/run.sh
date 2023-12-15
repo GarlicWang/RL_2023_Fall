@@ -1,6 +1,6 @@
 export EXP_DIR=./experiments
 export DATA_DIR=./data
-export export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=0
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/YOUR_PATH/.mujoco/mujoco210/bin
 
 ### train RL model by pretrained skill prior
