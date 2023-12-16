@@ -9,6 +9,7 @@ from spirl.modules.variational_inference import MultivariateGaussian
 class spirlModel:
 	def __init__(self):
 		self.model_path = "./experiments/skill_prior_learning/maze/hierarchical/weights/weights_ep199.pth"
+		assert os.path.isfile(self.model_path), "model not found"
 		self.model_config = {'state_dim': 4, 'action_dim': 2, 'n_rollout_steps': 10, 'kl_div_weight': 0.01, 'prior_input_res': 32, 'n_input_frames': 2, 'batch_size': 1, 'dataset_class': GlobalSplitVideoDataset, 'n_actions': 2, 'split': {'train': 0.9, 'val': 0.1, 'test': 0.0}, 'res': 32, 'crop_rand_subseq': True, 'max_seq_len': 300, 'subseq_len': 12, 'device': 'cpu'}
 		self.skill_prior = ImageSkillPriorMdl(self.model_config)
 		self.skill_prior.load_state_dict(torch.load(self.model_path)['state_dict'])
