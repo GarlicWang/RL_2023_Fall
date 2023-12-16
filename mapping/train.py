@@ -5,8 +5,9 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 
 from network import DomainTranslater
+from static_flow_vae import VAE
 from dataset import PseudoDataset
-from trainer import DomainTranslaterTrainer
+from trainer import DomainTranslaterTrainer, FlowVAEDomainTranslaterTrainer
 
 
 def set_seed(seed: int) -> None:
@@ -48,15 +49,26 @@ def main(config: DictConfig) -> None:
     valid_loader = DataLoader(valid_set, config.data.batch_size, shuffle=True, pin_memory=True)
     test_loader = DataLoader(test_set, config.data.batch_size, shuffle=False, pin_memory=True)
 
-    model = DomainTranslater(
-        input_dim=config.model.input_dim,
-        output_dim=config.model.output_dim,
+    # model = DomainTranslater(
+    #     input_dim=config.model.input_dim,
+    #     output_dim=config.model.output_dim,
+    #     latent_dim=config.model.latent_dim,
+    # )
+
+    model = VAE(
+        dataset="pseudo",
+        layer=config.model.layer,
+        in_dim=config.model.input_dim,
+        hidden_dim=config.model.hidden_dim,
         latent_dim=config.model.latent_dim,
+        gate=True,
+        flow='nice',
+        length=config.model.n_layers,
     )
 
     optimizer = optim.Adadelta(model.parameters(), lr=config.train.lr, weight_decay=config.train.weight_decay)
 
-    trainer = DomainTranslaterTrainer(
+    trainer = FlowVAEDomainTranslaterTrainer(
         model=model,
         train_loader=train_loader,
         valid_loader=valid_loader,
