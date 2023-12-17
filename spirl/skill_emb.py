@@ -10,8 +10,8 @@ from spirl.modules.variational_inference import MultivariateGaussian
 
 
 class spirlModel:
-    def __init__(self):
-        self.model_path = "./experiments/skill_prior_learning/maze/hierarchical/24task_1000rollout/weights/weights_ep199.pth"
+    def __init__(self, dens=1000):
+        self.model_path = f"./experiments/skill_prior_learning/maze/hierarchical/24task_1000rollout_dens{str(dens)}/weights/weights_ep199.pth"
         assert os.path.isfile(self.model_path), "model not found"
         self.model_config = {
             "state_dim": 4,
