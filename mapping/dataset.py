@@ -100,7 +100,7 @@ class MazeData(Dataset):
             self.tasks = [
                 (63, 11),
                 (63, 16),
-                # (63, 65),
+                (63, 65),
             ]
         elif self.dataset_type == "test":
             self.tasks = [
