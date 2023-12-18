@@ -75,6 +75,8 @@ class MazeData(Dataset):
         assert dataset_type in ["train", "valid", "test"]
         self.dataset_type = dataset_type
 
+        self.data_multiplier = 10
+
         # init, trag
         if self.dataset_type == "train":
             self.tasks = [
@@ -143,12 +145,13 @@ class MazeData(Dataset):
 
     def __len__(self) -> int:
         assert len(self.domain1_data) == len(self.domain2_data)
-        return len(self.domain1_data) * 10000
+        return len(self.domain1_data) * self.data_multiplier
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        lower_range = idx // 10000
+        lower_range = idx // (1000 * self.data_multiplier)
         upper_range = lower_range + 1000
         index = np.array(random.sample(range(lower_range, upper_range), k=20))
+        print(index)
         x = torch.stack([self.domain1_data[idx] for idx in index])
         y = torch.stack([self.domain2_data[idx] for idx in index])
-        return self.domain1_data[idx], self.domain2_data[idx]
+        return x, y
