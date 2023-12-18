@@ -98,3 +98,12 @@ class Transformer(nn.Module):
 
         x = self.out_layer(x)
         return self.norm(x)
+
+
+if __name__ == "__main__":
+    model = Transformer(20, 64, 20, 2, 32, 4, 0.0)
+
+    bsz, n, d = 2, 5, 20
+    x = torch.rand((bsz, n, d))
+    y = model(x)
+    print(y.shape)
