@@ -13,6 +13,7 @@ import torchvision.utils as utils
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class PlanarFlow(nn.Module):
     def __init__(self, dim):
         """Instantiates one step of planar flow.
@@ -39,21 +40,25 @@ class PlanarFlow(nn.Module):
         Returns:
             transformed x and log-determinant of Jacobian.
         """
+
         def m(x):
-            return F.softplus(x) - 1.
+            return F.softplus(x) - 1.0
+
         def h(x):
             return torch.tanh(x)
+
         def h_prime(x):
-            return 1. - h(x)**2
+            return 1.0 - h(x) ** 2
 
         inner = (self.w * self.u).sum()
-        u = self.u + (m(inner) - inner) * self.w / self.w.norm()**2
+        u = self.u + (m(inner) - inner) * self.w / self.w.norm() ** 2
         activation = (self.w * x).sum(dim=1, keepdim=True) + self.b
         x = x + u * h(activation)
         psi = h_prime(activation) * self.w
-        log_det = torch.log(torch.abs(1. + (u * psi).sum(dim=1, keepdim=True)))
+        log_det = torch.log(torch.abs(1.0 + (u * psi).sum(dim=1, keepdim=True)))
 
         return x, log_det
+
 
 class RadialFlow(nn.Module):
     def __init__(self, dim):
@@ -82,26 +87,30 @@ class RadialFlow(nn.Module):
         Returns:
             transformed x and log-determinant of Jacobian.
         """
+
         def m(x):
             return F.softplus(x)
+
         def h(r):
-            return 1. / (a + r)
+            return 1.0 / (a + r)
+
         def h_prime(r):
-            return -h(r)**2
+            return -h(r) ** 2
 
         a = torch.exp(self.a)
         b = -a + m(self.b)
         r = (x - self.c).norm(dim=1, keepdim=True)
         tmp = b * h(r)
         x = x + tmp * (x - self.c)
-        log_det = (self.d - 1) * torch.log(1. + tmp) + torch.log(1. + tmp + b * h_prime(r) * r)
+        log_det = (self.d - 1) * torch.log(1.0 + tmp) + torch.log(1.0 + tmp + b * h_prime(r) * r)
 
         return x, log_det
+
 
 class HouseholderFlow(nn.Module):
     def __init__(self, dim):
         """Instantiates one step of householder flow.
-        
+
         Reference:
         Improving Variational Auto-Encoders using Householder Flow
         Jakub M. Tomczak, Max Welling
@@ -124,11 +133,12 @@ class HouseholderFlow(nn.Module):
             transformed x and log-determinant of Jacobian.
         """
         outer = self.v.t() * self.v
-        v_sqr = self.v.norm()**2
-        H = torch.eye(self.d).cuda() - 2. * outer / v_sqr
+        v_sqr = self.v.norm() ** 2
+        H = torch.eye(self.d).cuda() - 2.0 * outer / v_sqr
         x = torch.mm(H, x.t()).t()
-        
+
         return x, 0
+
 
 class NiceFlow(nn.Module):
     def __init__(self, dim, mask, final=False):
@@ -151,34 +161,32 @@ class NiceFlow(nn.Module):
             self.scale = nn.Parameter(torch.zeros(1, dim))
         else:
             self.mask = mask
-            self.coupling = nn.Sequential(
-                nn.Linear(dim//2, dim*5), nn.ReLU(), 
-                nn.Linear(dim*5, dim*5), nn.ReLU(), 
-                nn.Linear(dim*5, dim//2))
+            self.coupling = nn.Sequential(nn.Linear(dim // 2, dim * 5), nn.ReLU(), nn.Linear(dim * 5, dim * 5), nn.ReLU(), nn.Linear(dim * 5, dim // 2))
 
     def forward(self, x):
         if self.final:
             x = x * torch.exp(self.scale)
             log_det = torch.sum(self.scale)
-            
+
             return x, log_det
         else:
             [B, W] = list(x.size())
-            x = x.reshape(B, W//2, 2)
-            
+            x = x.reshape(B, W // 2, 2)
+
             if self.mask:
                 on, off = x[:, :, 0], x[:, :, 1]
             else:
                 off, on = x[:, :, 0], x[:, :, 1]
-            
+
             on = on + self.coupling(off)
 
             if self.mask:
                 x = torch.stack((on, off), dim=2)
             else:
                 x = torch.stack((off, on), dim=2)
-            
+
             return x.reshape(B, W), 0
+
 
 class Flow(nn.Module):
     def __init__(self, dim, type, length):
@@ -191,14 +199,14 @@ class Flow(nn.Module):
         """
         super(Flow, self).__init__()
 
-        if type == 'planar':
+        if type == "planar":
             self.flow = nn.ModuleList([PlanarFlow(dim) for _ in range(length)])
-        elif type == 'radial':
+        elif type == "radial":
             self.flow = nn.ModuleList([RadialFlow(dim) for _ in range(length)])
-        elif type == 'householder':
+        elif type == "householder":
             self.flow = nn.ModuleList([HouseholderFlow(dim) for _ in range(length)])
-        elif type == 'nice':
-            self.flow = nn.ModuleList([NiceFlow(dim, i//2, i==(length-1)) for i in range(length)])
+        elif type == "nice":
+            self.flow = nn.ModuleList([NiceFlow(dim, i // 2, i == (length - 1)) for i in range(length)])
         else:
             self.flow = nn.ModuleList([])
 
@@ -217,6 +225,7 @@ class Flow(nn.Module):
             log_det = log_det + inc
 
         return x, log_det
+
 
 class GatedLayer(nn.Module):
     def __init__(self, in_dim, out_dim):
@@ -240,6 +249,7 @@ class GatedLayer(nn.Module):
             transformed x.
         """
         return self.linear(x) * self.gate(x)
+
 
 class MLPLayer(nn.Module):
     def __init__(self, in_dim, out_dim, gate):
@@ -267,6 +277,7 @@ class MLPLayer(nn.Module):
         """
         return self.layer(x)
 
+
 class VAE(nn.Module):
     def __init__(self, dataset, layer, in_dim, hidden_dim, latent_dim, gate, flow, length):
         """Instantiates a VAE.
@@ -288,14 +299,11 @@ class VAE(nn.Module):
         self.mean = nn.Linear(hidden_dim, latent_dim)
         self.log_var = nn.Linear(hidden_dim, latent_dim)
 
-        self.encoder = nn.ModuleList(
-            [MLPLayer(in_dim, hidden_dim, gate)] + \
-            [MLPLayer(hidden_dim, hidden_dim, gate) for _ in range(layer - 1)])
+        self.encoder = nn.ModuleList([MLPLayer(in_dim, hidden_dim, gate)] + [MLPLayer(hidden_dim, hidden_dim, gate) for _ in range(layer - 1)])
         self.flow = Flow(latent_dim, flow, length)
         self.decoder = nn.ModuleList(
-            [MLPLayer(latent_dim, hidden_dim, gate)] + \
-            [MLPLayer(hidden_dim, hidden_dim, gate) for _ in range(layer - 1)] + \
-            [nn.Linear(hidden_dim, in_dim)])
+            [MLPLayer(latent_dim, hidden_dim, gate)] + [MLPLayer(hidden_dim, hidden_dim, gate) for _ in range(layer - 1)] + [nn.Linear(hidden_dim, in_dim)]
+        )
 
     def encode(self, x):
         """Encodes input.
@@ -318,7 +326,7 @@ class VAE(nn.Module):
         Returns:
             transformed latent codes and the log-determinant of the Jacobian.
         """
-        std = torch.exp(.5 * log_var)
+        std = torch.exp(0.5 * log_var)
         eps = torch.randn_like(std)
         z = eps.mul(std).add_(mean)
 
@@ -345,10 +353,10 @@ class VAE(nn.Module):
             generated samples.
         """
         z = torch.randn(size, self.latent_dim).cuda()
-        if self.dataset == 'mnist':	
-        	return torch.sigmoid(self.decode(z))
+        if self.dataset == "mnist":
+            return torch.sigmoid(self.decode(z))
         else:
-        	return self.decode(z)
+            return self.decode(z)
 
     def reconstruction_loss(self, x, x_hat):
         """Computes reconstruction loss.
@@ -356,13 +364,13 @@ class VAE(nn.Module):
         Args:
             x: original input (B x D).
             x_hat: reconstructed input (B x D).
-        Returns: 
+        Returns:
             sum of reconstruction loss over the minibatch.
         """
-        if self.dataset == 'mnist':
-            return nn.BCEWithLogitsLoss(reduction='none')(x_hat, x).sum(dim=1, keepdim=True)
+        if self.dataset == "mnist":
+            return nn.BCEWithLogitsLoss(reduction="none")(x_hat, x).sum(dim=1, keepdim=True)
         else:
-            return nn.MSELoss(reduction='none')(x_hat, x).sum(dim=1, keepdim=True)
+            return nn.MSELoss(reduction="none")(x_hat, x).sum(dim=1, keepdim=True)
 
     def latent_loss(self, mean, log_var, log_det):
         """Computes KL loss.
@@ -373,7 +381,7 @@ class VAE(nn.Module):
             log_det: log-determinant of the Jacobian.
         Returns: sum of KL loss over the minibatch.
         """
-        kl = -.5 * torch.sum(1. + log_var - mean.pow(2) - log_var.exp(), dim=1, keepdim=True)
+        kl = -0.5 * torch.sum(1.0 + log_var - mean.pow(2) - log_var.exp(), dim=1, keepdim=True)
         return kl - log_det
 
     def loss(self, x, x_hat, mean, log_var, log_det):
@@ -388,7 +396,7 @@ class VAE(nn.Module):
         Returns:
             sum of reconstruction and KL loss over the minibatch.
         """
-        return self.reconstruction_loss(x, x_hat) + self.latent_loss(mean, log_var, log_det) 
+        return self.reconstruction_loss(x, x_hat) + self.latent_loss(mean, log_var, log_det)
 
     def forward(self, x):
         """Forward pass.
@@ -401,11 +409,12 @@ class VAE(nn.Module):
         mean, log_var = self.encode(x)
         z, log_det = self.transform(mean, log_var)
         x_hat = self.decode(z)
-        
+
         return x_hat, mean, log_var, log_det
 
+
 def logit_transform(x, constraint=0.9, reverse=False):
-    '''Transforms data from [0, 1] into unbounded space.
+    """Transforms data from [0, 1] into unbounded space.
 
     Restricts data into [0.05, 0.95].
     Calculates logit(alpha+(1-alpha)*x).
@@ -417,36 +426,34 @@ def logit_transform(x, constraint=0.9, reverse=False):
     Returns:
         transformed tensor and log-determinant of Jacobian from the transform.
         (if reverse=True, no log-determinant is returned.)
-    '''
+    """
     if reverse:
-        x = 1. / (torch.exp(-x) + 1.)    # [0.05, 0.95]
-        x *= 2.             # [0.1, 1.9]
-        x -= 1.             # [-0.9, 0.9]
-        x /= constraint     # [-1, 1]
-        x += 1.             # [0, 2]
-        x /= 2.             # [0, 1]
+        x = 1.0 / (torch.exp(-x) + 1.0)  # [0.05, 0.95]
+        x *= 2.0  # [0.1, 1.9]
+        x -= 1.0  # [-0.9, 0.9]
+        x /= constraint  # [-1, 1]
+        x += 1.0  # [0, 2]
+        x /= 2.0  # [0, 1]
         return x, 0
     else:
         [B, C, H, W] = list(x.size())
-        
+
         # dequantization
-        noise = distributions.Uniform(0., 1.).sample((B, C, H, W))
-        x = (x * 255. + noise) / 256.
-        
+        noise = distributions.Uniform(0.0, 1.0).sample((B, C, H, W))
+        x = (x * 255.0 + noise) / 256.0
+
         # restrict data
-        x *= 2.             # [0, 2]
-        x -= 1.             # [-1, 1]
-        x *= constraint     # [-0.9, 0.9]
-        x += 1.             # [0.1, 1.9]
-        x /= 2.             # [0.05, 0.95]
+        x *= 2.0  # [0, 2]
+        x -= 1.0  # [-1, 1]
+        x *= constraint  # [-0.9, 0.9]
+        x += 1.0  # [0.1, 1.9]
+        x /= 2.0  # [0.05, 0.95]
 
         # logit data
-        logit_x = torch.log(x) - torch.log(1. - x)
+        logit_x = torch.log(x) - torch.log(1.0 - x)
 
         # log-determinant of Jacobian from the transform
-        pre_logit_scale = torch.tensor(
-            np.log(constraint) - np.log(1. - constraint))
-        log_diag_J = F.softplus(logit_x) + F.softplus(-logit_x) \
-            - F.softplus(-pre_logit_scale)
+        pre_logit_scale = torch.tensor(np.log(constraint) - np.log(1.0 - constraint))
+        log_diag_J = F.softplus(logit_x) + F.softplus(-logit_x) - F.softplus(-pre_logit_scale)
 
         return logit_x, torch.sum(log_diag_J, dim=(1, 2, 3)).mean()

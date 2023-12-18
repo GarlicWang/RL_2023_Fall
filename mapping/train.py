@@ -8,13 +8,14 @@ from network import DomainTranslater
 from static_flow_vae import VAE
 from dataset import PseudoDataset, MazeData
 from trainer import DomainTranslaterTrainer, FlowVAEDomainTranslaterTrainer
+from transformer import Transformer
 
 
 def set_seed(seed: int) -> None:
     torch.manual_seed(seed=seed)
 
 
-@hydra.main(config_path="config", config_name="pseudo_basic")
+@hydra.main(config_path="config", config_name="transformer")
 def main(config: DictConfig) -> None:
     print("Configuration")
     print("=" * 20)
@@ -62,21 +63,15 @@ def main(config: DictConfig) -> None:
     print("Train set length:", len(train_set))
     print("Valid set length:", len(valid_set))
     print("Test set length:", len(test_set))
-    train_loader = DataLoader(
-        train_set, config.data.batch_size, shuffle=True, pin_memory=True
-    )
-    valid_loader = DataLoader(
-        valid_set, config.data.batch_size, shuffle=True, pin_memory=True
-    )
-    test_loader = DataLoader(
-        test_set, config.data.batch_size, shuffle=False, pin_memory=True
-    )
+    train_loader = DataLoader(train_set, config.data.batch_size, shuffle=True, pin_memory=True)
+    valid_loader = DataLoader(valid_set, config.data.batch_size, shuffle=True, pin_memory=True)
+    test_loader = DataLoader(test_set, config.data.batch_size, shuffle=False, pin_memory=True)
 
-    model = DomainTranslater(
-        input_dim=config.model.input_dim,
-        output_dim=config.model.output_dim,
-        latent_dim=config.model.latent_dim,
-    )
+    # model = DomainTranslater(
+    #     input_dim=config.model.input_dim,
+    #     output_dim=config.model.output_dim,
+    #     latent_dim=config.model.latent_dim,
+    # )
 
     # model = VAE(
     #     dataset="pseudo",
@@ -89,9 +84,17 @@ def main(config: DictConfig) -> None:
     #     length=config.model.n_layers,
     # )
 
-    optimizer = optim.Adadelta(
-        model.parameters(), lr=config.train.lr, weight_decay=config.train.weight_decay
+    model = Transformer(
+        input_dim=config.model.input_dim,
+        hidden_dim=config.model.hidden_dim,
+        output_dim=config.model.output_dim,
+        n_layer=config.model.layer,
+        dim_head=config.model.dim_head,
+        n_head=config.model.n_head,
+        dropout=config.model.dropout,
     )
+
+    optimizer = optim.Adadelta(model.parameters(), lr=config.train.lr, weight_decay=config.train.weight_decay)
 
     trainer = DomainTranslaterTrainer(
         model=model,
