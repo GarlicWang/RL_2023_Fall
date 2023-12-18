@@ -151,7 +151,6 @@ class MazeData(Dataset):
         lower_range = idx // (1000 * self.data_multiplier)
         upper_range = lower_range + 1000
         index = np.array(random.sample(range(lower_range, upper_range), k=20))
-        print(index)
         x = torch.stack([self.domain1_data[idx] for idx in index])
         y = torch.stack([self.domain2_data[idx] for idx in index])
         return x, y
