@@ -38,7 +38,7 @@ class BasicTrainer:
         self.epoch = epoch
 
         self.best_valid_loss = 1e6
-        self.save_path = os.path.join(config.train.save_path, name)
+        self.save_path = os.path.join(config["train"]["save_path"], name)
         os.makedirs(self.save_path, exist_ok=True)
 
         self.enable_wandb = enable_wandb
@@ -99,6 +99,7 @@ class BasicTrainer:
             data = [d.to(self.device) for d in data]
             loss = self._valid(data)
 
+            best_loss = min(loss, best_loss)
             loss_history.append(loss)
 
         loss_avg = sum(loss_history) / len(loss_history)
