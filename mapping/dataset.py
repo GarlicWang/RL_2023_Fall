@@ -128,8 +128,8 @@ class MazeData(Dataset):
                 converters={"embedding": pd.eval, "sampled_embedding": pd.eval},
             )
 
-            domain1_data = domain1_raw_data["embedding"].to_numpy()
-            domain2_data = domain2_raw_data["embedding"].to_numpy()
+            domain1_data = np.array(domain1_raw_data["embedding"].to_numpy())
+            domain2_data = np.array(domain2_raw_data["embedding"].to_numpy())
 
             self.domain1_data.append(domain1_data)
             self.domain2_data.append(domain2_data)
