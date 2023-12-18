@@ -12,6 +12,7 @@ train:
     weight_decay: 0.00005
     device: "cuda:0"
     epoch: 2000
+    save_path: "checkpoint"
 
 model:
     input_dim: 20
