@@ -45,12 +45,8 @@ class PseudoDataset(Dataset):
                 std_1 += np.abs(np.random.normal(0, 1))
                 std_2 += np.abs(np.random.normal(0, 1))
 
-                self.data_dom_1[start:end] = torch.normal(
-                    mean=mean_1, std=std_1, size=(size, dim_1)
-                )
-                self.data_dom_2[start:end] = torch.normal(
-                    mean=mean_2, std=std_2, size=(size, dim_2)
-                )
+                self.data_dom_1[start:end] = torch.normal(mean=mean_1, std=std_1, size=(size, dim_1))
+                self.data_dom_2[start:end] = torch.normal(mean=mean_2, std=std_2, size=(size, dim_2))
 
         else:
             mean_1, std_1, dim_1 = domain_1
@@ -67,9 +63,7 @@ class PseudoDataset(Dataset):
 
 
 class MazeData(Dataset):
-    def __init__(
-        self, dataset_type: str, domain1_base_path: str, domain2_base_path: str
-    ) -> None:
+    def __init__(self, dataset_type: str, domain1_base_path: str, domain2_base_path: str) -> None:
         super().__init__()
 
         assert dataset_type in ["train", "valid", "test"]

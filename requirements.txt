@@ -20,5 +20,5 @@ mpi4py
 mujoco_py==2.0.2.9
 
 # mapping
-hydra
+hydra-core
 omegaconf
