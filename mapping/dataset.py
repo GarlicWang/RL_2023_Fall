@@ -1,4 +1,5 @@
 import torch
+import random
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
@@ -142,7 +143,12 @@ class MazeData(Dataset):
 
     def __len__(self) -> int:
         assert len(self.domain1_data) == len(self.domain2_data)
-        return len(self.domain1_data)
+        return len(self.domain1_data) * 10000
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        lower_range = idx // 10000
+        upper_range = lower_range + 1000
+        index = np.array(random.sample(range(lower_range, upper_range), k=20))
+        x = torch.stack([self.domain1_data[idx] for idx in index])
+        y = torch.stack([self.domain2_data[idx] for idx in index])
         return self.domain1_data[idx], self.domain2_data[idx]
