@@ -128,15 +128,17 @@ class MazeData(Dataset):
                 converters={"embedding": pd.eval, "sampled_embedding": pd.eval},
             )
 
-            domain1_data = torch.from_numpy(
-                np.array(domain1_raw_data["embedding"].to_list())
-            )
-            domain2_data = torch.from_numpy(
-                np.array(domain2_raw_data["embedding"].to_list())
-            )
+            for data1, data2 in zip(
+                domain1_raw_data["embedding"],
+                domain2_raw_data["embedding"],
+            ):
+                assert len(data1) == len(data2)
 
-            self.domain1_data.append(domain1_data)
-            self.domain2_data.append(domain2_data)
+                domain1_data = torch.from_numpy(np.array(data1)).to(torch.float32)
+                domain2_data = torch.from_numpy(np.array(data2)).to(torch.float32)
+
+                self.domain1_data.append(domain1_data)
+                self.domain2_data.append(domain2_data)
 
     def __len__(self) -> int:
         assert len(self.domain1_data) == len(self.domain2_data)
