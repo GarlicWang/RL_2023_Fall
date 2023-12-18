@@ -75,7 +75,9 @@ class BasicTrainer:
                 }
             )
 
-        print(f"[Train] Avg loss: {loss_avg:.4f}, best loss: {best_loss:.4f}, gradient norm: {grad_norm:.4f}")
+        print(
+            f"[Train] Avg loss: {loss_avg:.4f}, best loss: {best_loss:.4f}, gradient norm: {grad_norm:.4f}"
+        )
 
     def _valid(self, data: Tuple[torch.Tensor, torch.Tensor]) -> float:
         """
@@ -95,7 +97,10 @@ class BasicTrainer:
             loss = self._valid(data)
 
             # record
-            best_loss = min(best_loss, loss)
+            if loss < best_loss:
+                best_loss = loss
+                torch.save(self.model.state_dict(), f"best_model_{loss}.pt")
+
             loss_history.append(loss)
 
         loss_avg = sum(loss_history) / len(loss_history)
@@ -243,7 +248,7 @@ class FlowVAEDomainTranslaterTrainer(BasicTrainer):
             name,
             config,
         )
-    
+
     def __loss_fn(self, source: torch.Tensor, gt: torch.Tensor) -> torch.Tensor:
         return F.mse_loss(source, gt)
 
