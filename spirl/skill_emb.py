@@ -11,8 +11,8 @@ from spirl.modules.variational_inference import MultivariateGaussian
 
 class spirlModel:
     def __init__(self, dens=1000, dim=20):
-		assert dens in [250, 1000], "invalid density"
-		assert dim in [20, 128], "invalid dimension"
+        assert dens in [250, 1000], "invalid density"
+        assert dim in [20, 128], "invalid dimension"
         self.model_path = f"./experiments/skill_prior_learning/maze/hierarchical/24task_1000rollout_dens{str(dens)}_dim{str(dim)}/weights/weights_ep199.pth"
         assert os.path.isfile(self.model_path), "model not found"
         self.model_config = {
@@ -34,8 +34,8 @@ class spirlModel:
         }
         self.skill_prior = ImageSkillPriorMdl(self.model_config)
         if dim == 128: # need to rebuild the network
-            skill_prior._hp.nz_vae, skill_prior._hp.nz_enc = 64, 64
-            skill_prior.build_network()
+            self.skill_prior._hp.nz_vae, self.skill_prior._hp.nz_enc = 64, 64
+            self.skill_prior.build_network()
         self.skill_prior.load_state_dict(torch.load(self.model_path)["state_dict"])
         self.encoder = self.skill_prior.q
 
@@ -68,9 +68,7 @@ def process_traj(init, targ):
         split_num = 5 # choose an odd number
         subseq_length = traj_dict.actions.shape[0]/((split_num+1)/2) # with half subsequence overlapping
         action_subseq_list = [traj_dict.actions[int(subseq_length*i/2):int(subseq_length*(i/2+1))] for i in range(split_num)] # note that each subsequence may have different length due to the int()
-        z_list = []
-        for action_subseq in action_subseq_list:
-        	z_list.append(skill_prior.q(action_subseq.reshape(1,-1,2))[:,-1])
+        z_list = [spirl_model.encoder(action_subseq.reshape(1,-1,2))[:,-1] for action_subseq in action_subseq_list]
         ###
 
         df.loc[len(df.index)] = [
