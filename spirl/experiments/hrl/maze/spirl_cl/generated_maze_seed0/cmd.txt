@@ -1,0 +1,4 @@
+python spirl/rl/train.py --path=spirl/configs/hrl/maze/spirl_cl --seed=0 --prefix=generated_maze_seed0
+
+python spirl/rl/train.py --path=spirl/configs/hrl/maze/spirl_cl --seed=0 --prefix=generated_maze_seed0
+

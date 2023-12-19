@@ -7,11 +7,13 @@ class DomainTranslater(nn.Module):
     def basic_block(input_dim: int, output_dim: int) -> nn.Module:
         return nn.Sequential(
             nn.Linear(input_dim, output_dim),
-            nn.BatchNorm1d(output_dim),
+            nn.BatchNorm2d(output_dim),
             nn.ReLU(True),
         )
 
-    def __init__(self, input_dim: int = 1024, output_dim: int = 1024, latent_dim: int = 256) -> None:
+    def __init__(
+        self, input_dim: int = 1024, output_dim: int = 1024, latent_dim: int = 256
+    ) -> None:
         super().__init__()
 
         self.encoder = nn.Sequential(

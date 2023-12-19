@@ -8,6 +8,7 @@ import wandb
 from tqdm import tqdm
 import os
 
+
 from tools import gradient_norm
 from network import DomainTranslater
 
@@ -81,6 +82,11 @@ class BasicTrainer:
             )
 
         print(f"[Train] Avg loss: {loss_avg:.4f}, best loss: {best_loss:.4f}, gradient norm: {grad_norm:.4f}")
+
+        print(
+            f"[Train] Avg loss: {loss_avg:.4f}, best loss: {best_loss:.4f}, gradient norm: {grad_norm:.4f}"
+        )
+
 
     def _valid(self, data: Tuple[torch.Tensor, torch.Tensor]) -> float:
         """

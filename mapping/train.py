@@ -63,9 +63,15 @@ def main(config: DictConfig) -> None:
     print("Train set length:", len(train_set))
     print("Valid set length:", len(valid_set))
     print("Test set length:", len(test_set))
-    train_loader = DataLoader(train_set, config.data.batch_size, shuffle=True, pin_memory=True)
-    valid_loader = DataLoader(valid_set, config.data.batch_size, shuffle=True, pin_memory=True)
-    test_loader = DataLoader(test_set, config.data.batch_size, shuffle=False, pin_memory=True)
+    train_loader = DataLoader(
+        train_set, config.data.batch_size, shuffle=True, pin_memory=True
+    )
+    valid_loader = DataLoader(
+        valid_set, config.data.batch_size, shuffle=True, pin_memory=True
+    )
+    test_loader = DataLoader(
+        test_set, config.data.batch_size, shuffle=False, pin_memory=True
+    )
 
     # model = DomainTranslater(
     #     input_dim=config.model.input_dim,
@@ -94,7 +100,9 @@ def main(config: DictConfig) -> None:
         dropout=config.model.dropout,
     )
 
-    optimizer = optim.Adadelta(model.parameters(), lr=config.train.lr, weight_decay=config.train.weight_decay)
+    optimizer = optim.Adadelta(
+        model.parameters(), lr=config.train.lr, weight_decay=config.train.weight_decay
+    )
 
     trainer = DomainTranslaterTrainer(
         model=model,
