@@ -58,6 +58,16 @@ def process_traj(init, targ):
         traj_dict = load_traj(init, targ, rollout_id)
         z = spirl_model.encoder(traj_dict.actions.reshape(1, -1, 2))[:, -1]
         z_sample = MultivariateGaussian(z).sample()
+
+		### split rollout to multiple subsequences
+		split_num = 5 # choose an odd number
+		subseq_length = traj_dict.actions.shape[0]/((split_num+1)/2) # with half subsequence overlapping
+		action_subseq_list = [traj_dict.actions[int(subseq_length*i/2):int(subseq_length*(i/2+1))] for i in range(split_num)] # note that each subsequence may have different length due to the int()
+		z_list = []
+		for action_subseq in action_subseq_list:
+			z_list.append(skill_prior.q(action_subseq.reshape(1,-1,2))[:,-1])
+		###
+
         df.loc[len(df.index)] = [
             init,
             targ,
