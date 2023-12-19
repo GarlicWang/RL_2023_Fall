@@ -18,3 +18,9 @@ pandas
 wandb
 mpi4py
 mujoco_py==2.0.2.9
+
+# mapping
+hydra-core
+omegaconf
+tqdm
+einops

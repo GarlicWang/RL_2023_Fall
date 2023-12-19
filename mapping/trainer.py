@@ -6,6 +6,8 @@ from torch.utils.data import DataLoader
 from typing import *
 import wandb
 from tqdm import tqdm
+import os
+
 
 from tools import gradient_norm
 from network import DomainTranslater
@@ -35,6 +37,10 @@ class BasicTrainer:
         self.optimizer = optimizer
         self.device = device
         self.epoch = epoch
+
+        self.best_valid_loss = 1e6
+        self.save_path = os.path.join(config["train"]["save_path"], name)
+        os.makedirs(self.save_path, exist_ok=True)
 
         self.enable_wandb = enable_wandb
         if enable_wandb:
@@ -75,9 +81,12 @@ class BasicTrainer:
                 }
             )
 
+        print(f"[Train] Avg loss: {loss_avg:.4f}, best loss: {best_loss:.4f}, gradient norm: {grad_norm:.4f}")
+
         print(
             f"[Train] Avg loss: {loss_avg:.4f}, best loss: {best_loss:.4f}, gradient norm: {grad_norm:.4f}"
         )
+
 
     def _valid(self, data: Tuple[torch.Tensor, torch.Tensor]) -> float:
         """
@@ -96,14 +105,15 @@ class BasicTrainer:
             data = [d.to(self.device) for d in data]
             loss = self._valid(data)
 
-            # record
-            if loss < best_loss:
-                best_loss = loss
-                torch.save(self.model.state_dict(), f"best_model.pt")
-
+            best_loss = min(loss, best_loss)
             loss_history.append(loss)
 
         loss_avg = sum(loss_history) / len(loss_history)
+        if loss_avg < self.best_valid_loss:
+            self.best_valid_loss = loss_avg
+            save_dir = os.path.join(self.save_path, f"best_model_{loss_avg:.4f}.pt")
+            print("Model saving at %s" % save_dir)
+            torch.save(self.model.state_dict(), save_dir)
 
         if self.enable_wandb:
             wandb.log(
