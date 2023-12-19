@@ -10,8 +10,10 @@ from spirl.modules.variational_inference import MultivariateGaussian
 
 
 class spirlModel:
-    def __init__(self, dens=1000):
-        self.model_path = f"./experiments/skill_prior_learning/maze/hierarchical/24task_1000rollout_dens{str(dens)}/weights/weights_ep199.pth"
+    def __init__(self, dens=1000, dim=20):
+		assert dens in [250, 1000], "invalid density"
+		assert dim in [20, 128], "invalid dimension"
+        self.model_path = f"./experiments/skill_prior_learning/maze/hierarchical/24task_1000rollout_dens{str(dens)}_dim{str(dim)}/weights/weights_ep199.pth"
         assert os.path.isfile(self.model_path), "model not found"
         self.model_config = {
             "state_dim": 4,
@@ -31,6 +33,9 @@ class spirlModel:
             "device": "cpu",
         }
         self.skill_prior = ImageSkillPriorMdl(self.model_config)
+        if dim == 128: # need to rebuild the network
+            skill_prior._hp.nz_vae, skill_prior._hp.nz_enc = 64, 64
+            skill_prior.build_network()
         self.skill_prior.load_state_dict(torch.load(self.model_path)["state_dict"])
         self.encoder = self.skill_prior.q
 
