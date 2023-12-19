@@ -33,7 +33,7 @@ class spirlModel:
             "device": "cpu",
         }
         self.skill_prior = ImageSkillPriorMdl(self.model_config)
-        if dim == 128: # need to rebuild the network
+        if dim == 128:  # need to rebuild the network
             self.skill_prior._hp.nz_vae, self.skill_prior._hp.nz_enc = 64, 64
             self.skill_prior.build_network()
         self.skill_prior.load_state_dict(torch.load(self.model_path)["state_dict"])
@@ -57,7 +57,14 @@ def load_traj(init, targ, rollout_id):
 def process_traj(init, targ):
     print(f"init: {init}, targ: {targ}")
     df = pd.DataFrame(
-        columns=["init", "targ", "rollout_id", "embedding", "sampled_embedding"]
+        columns=[
+            "init",
+            "targ",
+            "rollout_id",
+            "z_list",
+            "embedding",
+            "sampled_embedding",
+        ]
     )
     for rollout_id in range(1000):
         traj_dict = load_traj(init, targ, rollout_id)
@@ -65,49 +72,67 @@ def process_traj(init, targ):
         z_sample = MultivariateGaussian(z).sample()
 
         ### split rollout to multiple subsequences
-        split_num = 5 # choose an odd number
-        subseq_length = traj_dict.actions.shape[0]/((split_num+1)/2) # with half subsequence overlapping
-        action_subseq_list = [traj_dict.actions[int(subseq_length*i/2):int(subseq_length*(i/2+1))] for i in range(split_num)] # note that each subsequence may have different length due to the int()
-        z_list = [spirl_model.encoder(action_subseq.reshape(1,-1,2))[:,-1] for action_subseq in action_subseq_list]
+        split_num = 5  # choose an odd number
+        subseq_length = traj_dict.actions.shape[0] / (
+            (split_num + 1) / 2
+        )  # with half subsequence overlapping
+        action_subseq_list = [
+            traj_dict.actions[
+                int(subseq_length * i / 2) : int(subseq_length * (i / 2 + 1))
+            ]
+            for i in range(split_num)
+        ]  # note that each subsequence may have different length due to the int()
+        z_list = [
+            (spirl_model.encoder(action_subseq.reshape(1, -1, 2))[:, -1])
+            .squeeze()
+            .detach()
+            .numpy()
+            .tolist()
+            for action_subseq in action_subseq_list
+        ]
         ###
 
         df.loc[len(df.index)] = [
             init,
             targ,
             rollout_id,
+            z_list,
             z.squeeze().detach().numpy().tolist(),
             z_sample.squeeze().detach().numpy().tolist(),
         ]
 
-    df.to_csv(f"domainA/init{init}_targ{targ}.csv", index=False)
+    df.to_csv(f"testdata/init{init}_targ{targ}.csv", index=False)
     return True
 
 
 train_tasks = [
-    (12, 16),
-    (12, 61),
-    (12, 65),
-    (15, 11),
-    (15, 61),
-    (15, 65),
-    (21, 16),
-    (21, 61),
-    (21, 65),
-    (26, 11),
-    (26, 61),
-    (26, 65),
-    (46, 11),
-    (46, 16),
-    (46, 61),
-    (51, 11),
-    (51, 16),
-    (51, 65),
-    (63, 11),
-    (63, 16),
-    (63, 65),
-    (65, 11),
-    (65, 16),
-    (65, 61),
+    # (12, 16),
+    # (12, 61),
+    # (12, 65),
+    # (15, 11),
+    # (15, 61),
+    # (15, 65),
+    # (21, 16),
+    # (21, 61),
+    # (21, 65),
+    # (26, 11),
+    # (26, 61),
+    # (26, 65),
+    # (46, 11),
+    # (46, 16),
+    # (46, 61),
+    # (51, 11),
+    # (51, 16),
+    # (51, 65),
+    # (63, 11),
+    # (63, 16),
+    # (63, 65),
+    # (65, 11),
+    # (65, 16),
+    # (65, 61),
+    (11, 56),
+    (16, 56),
+    (51, 56),
 ]
 
 if __name__ == "__main__":
