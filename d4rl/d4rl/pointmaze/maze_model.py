@@ -212,6 +212,12 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         if self.reset_target:
             self.set_target()
         return self._get_obs()
+    
+    def reset(self, idx):
+        self.sim.reset()
+        ob = self.reset_model(idx)
+        return ob
+
 
     def reset_to_location(self, location):
         self.sim.reset()
