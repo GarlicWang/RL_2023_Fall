@@ -8,6 +8,8 @@ import numpy as np
 import random
 import mujoco_py
 from d4rl.pointmaze.maze_layouts import U_MAZE
+from spirl.utils.vis_utils import add_caption_to_img, add_captions_to_seq
+
 
 import ipdb
 
@@ -43,10 +45,13 @@ def point_maze(maze_str):
     mjcmodel = MJCModel('point_maze')
     mjcmodel.root.compiler(inertiafromgeom="true", angle="radian", coordinate="local")
     mjcmodel.root.option(timestep="0.01", gravity="0 0 0", iterations="20", integrator="Euler")
-    # mjcmodel.root.option(timestep="0.01", gravity="0 0 0", iteration="20", integrator="Euler")
+    # mjcmodel.root.option(timestep="0.01", gravity="0 10 0", iteration="20", integrator="Euler")
+    
     default = mjcmodel.root.default()
     default.joint(damping=1, limited='false')
     default.geom(friction=".5 .1 .1", density="1000", margin="0.002", condim="1", contype="2", conaffinity="1")
+    # default.geom(friction=".5 .1 .1", density="1000", margin="0.002", condim="1",contype="2", conaffinity="1")
+    # default.geom(friction=".001 .0005 .00001", density="100", margin="0.002", condim="3",contype="2", conaffinity="1")
 
     asset = mjcmodel.root.asset()
     asset.texture(type="2d",name="groundplane",builtin="checker",rgb1="0.2 0.3 0.4",rgb2="0.1 0.2 0.3",width=100,height=100)
@@ -95,24 +100,28 @@ def point_maze(maze_str):
 
 
 class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
-    AGENT_CENTRIC_RES = 32
+    # AGENT_CENTRIC_RES = 32
     def __init__(self,
                  maze_spec=U_MAZE,
                  reward_type='dense',
                  reset_target=False,
-                 agent_centric_view=False,
+                 targ_pos=[1.0,1.0],
+                 agent_centric_view=True,
                  **kwargs):
         offline_env.OfflineEnv.__init__(self, **kwargs)
-
+        self.AGENT_CENTRIC_RES = 256
         self.reset_target = reset_target
         self.str_maze_spec = maze_spec
         self.maze_arr = parse_maze(maze_spec)
         self.reward_type = reward_type
         self.agent_centric_view = agent_centric_view
         self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
+        self.reset_locations.append((6, 6))
         self.reset_locations.sort()
 
-        self._target = np.array([0.0,0.0])
+        # real target position
+        # self._target = np.array([6.0,1.0])
+        self._target=targ_pos
 
         self.observation_space = spaces.Box(-np.inf, np.inf, (4,))
 
@@ -124,7 +133,9 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
 
         # Set the default goal (overriden by a call to set_target)
         # Try to find a goal if it exists
-        self.goal_locations = list(zip(*np.where(self.maze_arr == GOAL)))
+        # self.goal_locations = list(zip(*np.where(self.maze_arr == GOAL)))
+        self.goal_locations = [self._target]
+        # ipdb.set_trace()
         if len(self.goal_locations) == 1:
             self.set_target(self.goal_locations[0])
         elif len(self.goal_locations) > 1:
@@ -136,19 +147,20 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
 
     def step(self, action):
         action = np.clip(action, -1.0, 1.0)
+        
         self.clip_velocity()
         self.do_simulation(action, self.frame_skip)
         self.set_marker()
         ob = self._get_obs()
         # ipdb.set_trace()
         if self.reward_type == 'sparse':
-            reward = 1.0 if np.linalg.norm(ob[0:2] - self._target) <= 0.2 else 0.0
+            reward = 1.0 if np.linalg.norm(ob[0:2] - self._target) <= 0.5 else 0.0
         elif self.reward_type == 'dense':
             reward = np.exp(-np.linalg.norm(ob[0:2] - self._target))
         else:
             raise ValueError('Unknown reward type %s' % self.reward_type)
         done = False
-        return ob, reward, done, {"success": np.linalg.norm(ob[0:2] - self._target) <= 0.2, "distance":ob[0:2] - self._target}
+        return ob, reward, done, {"success": np.linalg.norm(ob[0:2] - self._target) <= 0.5, "action":action ,"distance":ob[0:2] - self._target}
 
     def render(self, mode, *args, **kwargs):
         if self.agent_centric_view:
@@ -177,13 +189,26 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         qvel = np.clip(self.sim.data.qvel, -5.0, 5.0)
         self.set_state(self.sim.data.qpos, qvel)
 
-    def reset_model(self):
-        idx = self.np_random.choice(len(self.empty_and_goal_locations))
+    # def reset(self, idx=None):
+    #     self.sim.reset()
+    #     ob = self.reset_model(idx)
+    #     return ob
+
+    def reset_model(self, idx=None):
+        if idx==None:
+           idx = self.np_random.choice(len(self.empty_and_goal_locations))
+
         reset_location = np.array(self.empty_and_goal_locations[idx]).astype(self.observation_space.dtype)
-        qpos = reset_location + self.np_random.uniform(low=-.1, high=.1, size=self.model.nq)
+        # target location with randomness
+        # qpos = reset_location + self.np_random.uniform(low=-.1, high=.1, size=self.model.nq)
         # qvel = self.init_qvel + self.np_random.randn(self.model.nv) * .1
-        qvel = self.init_qvel + self.np_random.standard_normal(self.model.nv) * .1
+        # qvel = self.init_qvel + self.np_random.standard_normal(self.model.nv) * .1
+        # print(f"reset_location: {reset_location}")
+        # fixed target location
+        qpos = reset_location
+        qvel = self.init_qvel
         self.set_state(qpos, qvel)
+
         if self.reset_target:
             self.set_target()
         return self._get_obs()
@@ -209,3 +234,47 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
         self.viewer.cam.elevation = -90  # camera rotation around the axis in the plane going through the frame origin (if 0 you just see a line)
         self.viewer.cam.azimuth = 0  # camera rotation around the camera's vertical axis
 
+class MediumMazeEnv(MazeEnv):
+    
+    def __init__(self,
+                 maze_spec=U_MAZE,
+                 reward_type='dense',
+                 reset_target=False,
+                 agent_centric_view=False,
+                 **kwargs):
+        offline_env.OfflineEnv.__init__(self, **kwargs)
+        START_POS = np.array([4, 1])    
+        # task 1: 
+        TARGET_POS = np.array([6, 5])
+        # task 2:
+        # TARGET_POS = np.array([1. , 6.])
+
+        self.reset_target = reset_target
+        self.str_maze_spec = maze_spec
+        self.maze_arr = parse_maze(maze_spec)
+        self.reward_type = reward_type
+        self.agent_centric_view = agent_centric_view
+        self.reset_locations = list(zip(*np.where(self.maze_arr == EMPTY)))
+        self.reset_locations.sort()
+
+        self._target = TARGET_POS
+
+        self.observation_space = spaces.Box(-np.inf, np.inf, (4,))
+
+        model = point_maze(maze_spec)
+        with model.asfile() as f:
+
+            mujoco_env.MujocoEnv.__init__(self, model_path=f.name, frame_skip=1)
+        utils.EzPickle.__init__(self)
+
+        # Set the default goal (overriden by a call to set_target)
+        # Try to find a goal if it exists
+        self.goal_locations = list(zip(*np.where(self.maze_arr == GOAL)))
+        if len(self.goal_locations) == 1:
+            self.set_target(self.goal_locations[0])
+        elif len(self.goal_locations) > 1:
+            raise ValueError("More than 1 goal specified!")
+        else:
+            # If no goal, use the first empty tile
+            self.set_target(np.array(self.reset_locations[0]).astype(self.observation_space.dtype))
+        self.empty_and_goal_locations = self.reset_locations + self.goal_locations
