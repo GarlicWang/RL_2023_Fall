@@ -16,6 +16,7 @@ from spirl.utils.general_utils import AttrDict
 from spirl.utils.vis_utils import add_caption_to_img, add_captions_to_seq
 
 # python3 d4rl/scripts/generate_videos_from_actions.py --data_dir=data/{path to action seqs} --caption
+
 def reset_data():
     return {'observations': [],
             'actions': [],
@@ -29,8 +30,10 @@ def reset_data():
 
 def append_data(data, s, a, img, tgt, done, env_data, caption=False):
     try:
+        # ipdb.set_trace()
         data['observations'].append(s)
     except:
+        ipdb.set_trace()
         list(data['observation']).append(s)
     # if caption:
         
