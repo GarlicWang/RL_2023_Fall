@@ -28,22 +28,6 @@ def main(config: DictConfig) -> None:
 
     set_seed(config.seed)
 
-    # train_set = PseudoDataset(
-    #     n_data=config.data.n_train_data,
-    #     domain_1=(config.data.mean_1, config.data.std_1, config.data.dim_1),
-    #     domain_2=(config.data.mean_2, config.data.std_2, config.data.dim_2),
-    # )
-    # valid_set = PseudoDataset(
-    #     n_data=config.data.n_valid_data,
-    #     domain_1=(config.data.mean_1, config.data.std_1, config.data.dim_1),
-    #     domain_2=(config.data.mean_2, config.data.std_2, config.data.dim_2),
-    # )
-    # test_set = PseudoDataset(
-    #     n_data=config.data.n_test_data,
-    #     domain_1=(config.data.mean_1, config.data.std_1, config.data.dim_1),
-    #     domain_2=(config.data.mean_2, config.data.std_2, config.data.dim_2),
-    # )
-
     train_set = MazeData(
         dataset_type="train",
         domain1_base_path=config.data.domain1_base_path,
@@ -73,23 +57,6 @@ def main(config: DictConfig) -> None:
         test_set, config.data.batch_size, shuffle=False, pin_memory=True
     )
 
-    # model = DomainTranslater(
-    #     input_dim=config.model.input_dim,
-    #     output_dim=config.model.output_dim,
-    #     latent_dim=config.model.latent_dim,
-    # )
-
-    # model = VAE(
-    #     dataset="pseudo",
-    #     layer=config.model.layer,
-    #     in_dim=config.model.input_dim,
-    #     hidden_dim=config.model.hidden_dim,
-    #     latent_dim=config.model.latent_dim,
-    #     gate=True,
-    #     flow="nice",
-    #     length=config.model.n_layers,
-    # )
-
     model = Transformer(
         input_dim=config.model.input_dim,
         hidden_dim=config.model.hidden_dim,
@@ -117,20 +84,6 @@ def main(config: DictConfig) -> None:
         name=config.name,
         config=OmegaConf.to_object(config),
     )
-
-    # trainer = FlowVAEDomainTranslaterTrainer(
-    #     model=model,
-    #     train_loader=train_loader,
-    #     valid_loader=valid_loader,
-    #     test_loader=test_loader,
-    #     optimizer=optimizer,
-    #     epoch=config.train.epoch,
-    #     device=device,
-    #     enable_wandb=config.enable_wandb,
-    #     project=config.project,
-    #     name=config.name,
-    #     config=OmegaConf.to_object(config),
-    # )
 
     trainer.run()
 

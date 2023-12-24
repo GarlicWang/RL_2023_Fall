@@ -101,36 +101,15 @@ def process_traj(init, targ):
             z_sample.squeeze().detach().numpy().tolist(),
         ]
 
-    df.to_csv(f"script_data/init{init}_targ{targ}.csv", index=False)
+    df.to_csv(f"testdata/init{init}_targ{targ}.csv", index=False)
 
     return True
 
 
 train_tasks = [
-    (12, 16),
-    (12, 61),
-    (12, 65),
-    (15, 11),
-    (15, 61),
-    (15, 65),
-    (21, 16),
-    (21, 61),
-    (21, 65),
-    (26, 11),
-    (26, 61),
-    (26, 65),
-    (46, 11),
-    (46, 16),
-    (46, 61),
-    (51, 11),
-    (51, 16),
-    (51, 65),
-    (63, 11),
-    (63, 16),
-    (63, 65),
-    (65, 11),
-    (65, 16),
-    (65, 61),
+    (11, 56),
+    (16, 56),
+    (51, 56),
 ]
 
 if __name__ == "__main__":
