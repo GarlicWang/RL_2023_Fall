@@ -12,7 +12,8 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 configuration = {
     'model': ImageSkillPriorMdl,
     'logger': SkillSpaceLogger,
-    'data_dir': os.path.join(os.environ['DATA_DIR'], 'maze'),
+    'data_dir': os.path.join(os.environ['DATA_DIR'], 'data_medMaze_scripts/task24_roll1000_dens250'), # density 250
+    # 'data_dir': os.path.join(os.environ['DATA_DIR'], 'data_medMaze_scripts/task24_roll1000_dens1000'), # density 1000
     'epoch_cycles_train': 10,
     'evaluator': TopOfNSequenceEvaluator,
     'top_of_n_eval': 100,

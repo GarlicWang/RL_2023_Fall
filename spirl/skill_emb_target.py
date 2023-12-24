@@ -13,7 +13,7 @@ class spirlModel:
     def __init__(self, dens=1000, dim=20):
         assert dens in [250, 1000], "invalid density"
         assert dim in [20, 128], "invalid dimension"
-        self.model_path = f"./experiments/skill_prior_learning/maze/hierarchical/24task_1000rollout_dens{str(dens)}_dim{str(dim)}/weights/weights_ep199.pth"
+        self.model_path = os.path.join(os.environ['EXP_DIR'], f"skill_prior_learning/maze/hierarchical/24task_1000rollout_dens{str(dens)}_dim{str(dim)}/weights/weights_ep199.pth")
         assert os.path.isfile(self.model_path), "model not found"
         self.model_config = {
             "state_dim": 4,
@@ -41,9 +41,8 @@ class spirlModel:
 
 
 def load_traj(init, targ, rollout_id):
-    file_path = (
-        f"data/data_medMaze_scripts/init{init}_targ{targ}/rollout_{rollout_id}.h5"
-    )
+    file_path = os.path.join(os.environ['DATA_DIR'], f"data_medMaze_scripts/task24_roll1000_dens250/init{init}_targ{targ}/rollout_{rollout_id}.h5") # density = 250
+    # file_path = os.path.join(os.environ['DATA_DIR'], f"data_medMaze_scripts/task24_roll1000_dens1000/init{init}_targ{targ}/rollout_{rollout_id}.h5") # density = 1000
     assert os.path.isfile(file_path), "traj file not found"
     traj_dict = dict()
     with h5py.File(file_path, "r") as f:
