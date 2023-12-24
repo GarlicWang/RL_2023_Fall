@@ -1,5 +1,11 @@
 from spirl.configs.rl.maze.base_conf import *
-from spirl.rl.envs.maze import UMazeEnv
+from spirl.rl.envs.maze import UMazeEnv, MediumMazeEnv
+
+wandb = AttrDict(
+    wandb_project_name = 'SBTMDRL',
+    wandb_entity_name='sbtmdrl',
+    wandb_group='medium_maze',
+)
 
 # configuration = {
 #     'seed': 42,
@@ -13,16 +19,18 @@ from spirl.rl.envs.maze import UMazeEnv
 #     # 'log_videos': True,
 # }
 # configuration = AttrDict(configuration)
+
 configuration = {
     'seed': 42,
     'agent': MazeSACAgent,
     # 'environment': ACRandMaze0S40Env,
-    'environment': UMazeEnv,
+    'environment': MediumMazeEnv,
     'data_dir': '.',
-    'num_epochs': 10,
-    'max_rollout_len': 100,
+    'num_epochs': 30,
+    'max_rollout_len': 1000,
     'n_steps_per_epoch': 1000,
-    'n_warmup_steps': 3e3,
+    'n_warmup_steps': 5e3,
     # 'log_videos': True,
 }
 configuration = AttrDict(configuration)
+
